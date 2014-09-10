@@ -23,7 +23,8 @@ public class SMTReportProcessor {
 	public static int CONSUMED = 16;
 	public static String BOARD_REPORT= "-b";
 	public static String COMPONENTS_REPORT= "-u";
-	
+
+
 	private CellProcessor[] getProcessors() {
 		final CellProcessor[] processors = new CellProcessor[] { null, // empty
 				null, // Layout name
@@ -49,7 +50,6 @@ public class SMTReportProcessor {
 	protected Map<String, List<Object>> readFile(String fileSource, CsvPreference csvPreference) throws Exception {
 		ICsvListReader listReader = null;
 		List<Object> reportList = null;
-		
 		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
 		try {
 			listReader = new CsvListReader(new FileReader(fileSource), csvPreference);
@@ -90,6 +90,9 @@ public class SMTReportProcessor {
 		} else {
 			System.out.println("\n" + " Invalid Command ");
 		}
+		
+	    
+		// System.out.println("\n\n\n\n");
 	}
 
 	private void generateComponentsReport(Map<String, List<Object>> file1, Map<String, List<Object>> file2) {
@@ -138,10 +141,34 @@ public class SMTReportProcessor {
 			}
 		}
 		
+		//If a component is mentioned in file1,but not in file2,
+		generateErrorReport(file1,file2);
+		
+		
+		
 	}
+
+	private void generateErrorReport(Map<String, List<Object>> file1,
+			Map<String, List<Object>> file2) {
+		if(file1!=null){
+			System.out.println("\n\n\n\n");
+			System.out.println(String.format("--------------Component is Mentioned in File1, but not in File2------------------"));
+			System.out.println("BoardName" + "\t\t\t\t");
+			for (String key : file1.keySet()) {
+				List<Object> filelist1 = file1.get(key);
+				List<Object> filelist2 = file2.get(key);
+				if(filelist1!=null && filelist2==null){
+					List<?> row1 = (List<?>) filelist1.get(0);				
+					System.out.println("-----------------------------------------------");
+					System.out.println(row1.get(BOARD_NAME) + "\t\t");
+				}
+			}	
+		}		
+	}
+
 	private void generateBoradsReport(Map<String, List<Object>> file1, Map<String, List<Object>> file2) {
 		System.out.println("BoardName" + "\t\t\t\t" + "Qty");
-		for (String key : file1.keySet()) {
+		for (String key : file2.keySet()) {
 			List<Object> filelist1 = file1.get(key);
 			List<Object> filelist2 = file2.get(key);
 			if (filelist1 == null && filelist2 != null) {
@@ -151,7 +178,7 @@ public class SMTReportProcessor {
 					System.out.println("-----------------------------------------------");
 					System.out.println(row1.get(BOARD_NAME) + "\t\t" + Math.abs(totalQty));
 
-			} else if (filelist1 != null && filelist2 != null) {
+			}else{
 				List<?> row1 = (List<?>) filelist1.get(0);
 				List<?> row2 = (List<?>) filelist2.get(0);
 				String qty1 = (String) row1.get(PCB_ASSEMBLED);// PCBs assembled
@@ -162,8 +189,13 @@ public class SMTReportProcessor {
 			}
 
 		}
-	
+		//If a component is mentioned in file1,but not in file2,
+	    generateErrorReport(file1,file2);
+				
 	}
+	
+	
+
 	public static void main(String[] args) {
 		try {
 			new SMTReportProcessor().generateReport(args[0], args[1], args[2]);
