@@ -21,7 +21,9 @@ public class SMTReportProcessor {
 	public static int PLACEMENT_FAILURE = 14;
 	public static int OTHER_FAILURE = 15;
 	public static int CONSUMED = 16;
-
+	public static String BOARD_REPORT= "-b";
+	public static String COMPONENTS_REPORT= "-u";
+	
 	private CellProcessor[] getProcessors() {
 		final CellProcessor[] processors = new CellProcessor[] { null, // empty
 				null, // Layout name
@@ -47,6 +49,7 @@ public class SMTReportProcessor {
 	protected Map<String, List<Object>> readFile(String fileSource, CsvPreference csvPreference) throws Exception {
 		ICsvListReader listReader = null;
 		List<Object> reportList = null;
+		
 		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
 		try {
 			listReader = new CsvListReader(new FileReader(fileSource), csvPreference);
@@ -80,30 +83,28 @@ public class SMTReportProcessor {
 	public void generateReport(String type, String file1, String file2) throws Exception {
 		Map<String, List<Object>> file1Map = readFile(file1, CsvPreference.TAB_PREFERENCE);
 		Map<String, List<Object>> file2Map = readFile(file2, CsvPreference.TAB_PREFERENCE);
-		if (("-b").equals(type)) {
+		if (BOARD_REPORT.equals(type)) {
 			generateBoradsReport(file1Map, file2Map);
-		} else if (("-u").equals(type)) {
+		} else if (COMPONENTS_REPORT.equals(type)) {
 			generateComponentsReport(file1Map, file2Map);
 		} else {
-			System.out.println("\n" + " Invalid Command");
+			System.out.println("\n" + " Invalid Command ");
 		}
 	}
 
 	private void generateComponentsReport(Map<String, List<Object>> file1, Map<String, List<Object>> file2) {
-		for (String key : file1.keySet()) {
+		
+		for (String key : file2.keySet()) {
 
 			List<Object> filelist1 = file1.get(key);
 			List<Object> filelist2 = file2.get(key);
 
-			System.out.println(String.format("%20s,%20s,%20s,%20s", "Component Name", "Qty Placed", "Qty Attrition",
-					"Qty Total"));
-			System.out
-					.println(String
-							.format("-----------------------------------------------------------------------------------------"));
+			System.out.println(String.format("%20s,%20s,%20s,%20s", "Component Name", "Qty Placed", "Qty Attrition","Qty Total"));
+			System.out.println(String.format("-----------------------------------------------------------------------------------------"));
 
-			if (filelist2 == null) {
-				for (int i = 0; i < filelist1.size(); i++) {
-					List<?> row = (List<?>) filelist1.get(i);
+			if (filelist1 == null && filelist2!=null) {
+				for (int i = 0; i < filelist2.size(); i++) {
+					List<?> row = (List<?>) filelist2.get(i);
 					String qty = (String) row.get(NUMBER_PLACED);
 					int qtyPlaced = Integer.valueOf(qty);
 					int qtyTotal = (Integer) row.get(CONSUMED);
@@ -113,8 +114,9 @@ public class SMTReportProcessor {
 					System.out.println(String.format("%20s,%20s,%20s,%20s", row.get(COMPONENT), Math.abs(qtyPlaced),
 							Math.abs(qtyAttrition), Math.abs(qtyTotal)));
 				}
-			} else {
-				for (int i = 0; i < filelist1.size(); i++) {
+			}
+			else {
+				for (int i = 0; i < filelist2.size(); i++) {
 					List<?> row1 = (List<?>) filelist1.get(i);
 					List<?> row2 = (List<?>) filelist2.get(i);
 					String qty1 = (String) row1.get(NUMBER_PLACED);
@@ -135,22 +137,20 @@ public class SMTReportProcessor {
 				}
 			}
 		}
+		
 	}
-
 	private void generateBoradsReport(Map<String, List<Object>> file1, Map<String, List<Object>> file2) {
 		System.out.println("BoardName" + "\t\t\t\t" + "Qty");
 		for (String key : file1.keySet()) {
 			List<Object> filelist1 = file1.get(key);
 			List<Object> filelist2 = file2.get(key);
-			if (filelist2 == null) {
-				if (filelist1 != null) {
-					List<?> row1 = (List<?>) filelist1.get(0);
-					String qty1 = (String) row1.get(PCB_ASSEMBLED);// PCBs
-																	// assembled
+			if (filelist1 == null && filelist2 != null) {
+					List<?> row1 = (List<?>) filelist2.get(0);
+					String qty1 = (String) row1.get(PCB_ASSEMBLED);// PCBs assembled
 					int totalQty = Integer.valueOf(qty1);
 					System.out.println("-----------------------------------------------");
 					System.out.println(row1.get(BOARD_NAME) + "\t\t" + Math.abs(totalQty));
-				}
+
 			} else if (filelist1 != null && filelist2 != null) {
 				List<?> row1 = (List<?>) filelist1.get(0);
 				List<?> row2 = (List<?>) filelist2.get(0);
@@ -162,8 +162,8 @@ public class SMTReportProcessor {
 			}
 
 		}
+	
 	}
-
 	public static void main(String[] args) {
 		try {
 			new SMTReportProcessor().generateReport(args[0], args[1], args[2]);
