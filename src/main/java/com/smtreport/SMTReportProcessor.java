@@ -1,5 +1,6 @@
 package com.smtreport;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.*;
 
@@ -26,7 +27,8 @@ public class SMTReportProcessor {
 
 
 	private CellProcessor[] getProcessors() {
-		final CellProcessor[] processors = new CellProcessor[] { null, // empty
+		final CellProcessor[] processors = new CellProcessor[] { 
+				null, // empty
 				null, // Layout name
 				null, // Station
 				null, // Layouts assembled
@@ -82,7 +84,7 @@ public class SMTReportProcessor {
 
 	public void generateReport(String type, String file1, String file2) throws Exception {
 		Map<String, List<Object>> file1Map = readFile(file1, CsvPreference.TAB_PREFERENCE);
-		Map<String, List<Object>> file2Map = readFile(file2, CsvPreference.TAB_PREFERENCE);
+		Map<String, List<Object>> file2Map = readFile(file2, CsvPreference.TAB_PREFERENCE);	
 		if (BOARD_REPORT.equals(type)) {
 			generateBoradsReport(file1Map, file2Map);
 		} else if (COMPONENTS_REPORT.equals(type)) {
@@ -90,20 +92,15 @@ public class SMTReportProcessor {
 		} else {
 			System.out.println("\n" + " Invalid Command ");
 		}
-		
-	    
-		// System.out.println("\n\n\n\n");
 	}
 
 	private void generateComponentsReport(Map<String, List<Object>> file1, Map<String, List<Object>> file2) {
 		
 		for (String key : file2.keySet()) {
-
 			List<Object> filelist1 = file1.get(key);
 			List<Object> filelist2 = file2.get(key);
-
-			System.out.println(String.format("%20s,%20s,%20s,%20s", "Component Name", "Qty Placed", "Qty Attrition","Qty Total"));
-			System.out.println(String.format("-----------------------------------------------------------------------------------------"));
+			System.out.println(String.format("%20s,%15s,%15s,%15s","Component Name","Qty Placed","Qty Attrition","Qty Total"));
+			System.out.println(String.format("-----------------------------------------------------------------------"));
 
 			if (filelist1 == null && filelist2!=null) {
 				for (int i = 0; i < filelist2.size(); i++) {
@@ -114,7 +111,7 @@ public class SMTReportProcessor {
 					int qtyAttrition = (Integer) row.get(MECHNICAL_FAILURE) + (Integer) row.get(ELECTRICAL_FAILURE)
 							+ (Integer) row.get(PICKING_FAILURE) + (Integer) row.get(PLACEMENT_FAILURE)
 							+ (Integer) row.get(OTHER_FAILURE);
-					System.out.println(String.format("%20s,%20s,%20s,%20s", row.get(COMPONENT), Math.abs(qtyPlaced),
+					System.out.println(String.format("%20s,%15s,%15s,%15s", row.get(COMPONENT), Math.abs(qtyPlaced),
 							Math.abs(qtyAttrition), Math.abs(qtyTotal)));
 				}
 			}
@@ -135,30 +132,25 @@ public class SMTReportProcessor {
 							+ (Integer) row2.get(PICKING_FAILURE) + (Integer) row2.get(PLACEMENT_FAILURE)
 							+ (Integer) row2.get(OTHER_FAILURE);
 					int qtyAttrition = failuefile1 - failuefile2;
-					System.out.println(String.format("%20s,%20s,%20s,%20s", row1.get(COMPONENT), Math.abs(qtyPlaced),
+					System.out.println(String.format("%20s,%15s,%15s,%15s", row1.get(COMPONENT), Math.abs(qtyPlaced),
 							Math.abs(qtyAttrition), Math.abs(qtyTotal)));
 				}
 			}
-		}
-		
+		}		
 		//If a component is mentioned in file1,but not in file2,
 		generateErrorReport(file1,file2);
-		
-		
-		
 	}
 
-	private void generateErrorReport(Map<String, List<Object>> file1,
-			Map<String, List<Object>> file2) {
+	private void generateErrorReport(Map<String, List<Object>> file1,Map<String, List<Object>> file2) {
 		if(file1!=null){
-			System.out.println("\n\n\n\n");
-			System.out.println(String.format("--------------Component is Mentioned in File1, but not in File2------------------"));
-			System.out.println("BoardName" + "\t\t\t\t");
 			for (String key : file1.keySet()) {
 				List<Object> filelist1 = file1.get(key);
 				List<Object> filelist2 = file2.get(key);
 				if(filelist1!=null && filelist2==null){
-					List<?> row1 = (List<?>) filelist1.get(0);				
+					List<?> row1 = (List<?>) filelist1.get(0);	
+					System.out.println("\n\n\n\n");
+					System.out.println(String.format("--------------Component is Mentioned in File1, but not in File2------------------"));
+					System.out.println("BoardName" + "\t\t\t\t");
 					System.out.println("-----------------------------------------------");
 					System.out.println(row1.get(BOARD_NAME) + "\t\t");
 				}
@@ -167,10 +159,13 @@ public class SMTReportProcessor {
 	}
 
 	private void generateBoradsReport(Map<String, List<Object>> file1, Map<String, List<Object>> file2) {
+		
 		System.out.println("BoardName" + "\t\t\t\t" + "Qty");
 		for (String key : file2.keySet()) {
+		
 			List<Object> filelist1 = file1.get(key);
 			List<Object> filelist2 = file2.get(key);
+			
 			if (filelist1 == null && filelist2 != null) {
 					List<?> row1 = (List<?>) filelist2.get(0);
 					String qty1 = (String) row1.get(PCB_ASSEMBLED);// PCBs assembled
@@ -193,14 +188,21 @@ public class SMTReportProcessor {
 	    generateErrorReport(file1,file2);
 				
 	}
-	
-	
-
 	public static void main(String[] args) {
-		try {
-			new SMTReportProcessor().generateReport(args[0], args[1], args[2]);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		if(args!=null && args.length==3){			
+			File f1 = new File(args[1]);
+			File f2 = new File(args[2]);			
+			if(f1.exists() && f2.exists()){
+				try {
+					new SMTReportProcessor().generateReport(args[0], args[1], args[2]);
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+			}else{
+				System.out.println("Invalid FilePath");
+			}
+		 }else{
+		        System.out.println("Parameter Missing");
+		 }
 	}
 }
