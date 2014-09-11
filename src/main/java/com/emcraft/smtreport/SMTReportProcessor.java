@@ -32,6 +32,11 @@ public class SMTReportProcessor {
 	public static String COMPONENTS_REPORT = "-u";
 
 	public static void main(String[] args) {
+		// Uncomment this for testing
+		// if (args == null || args.length == 0) {
+		// args = new String[] { COMPONENTS_REPORT, "file_1.txt", "file_2.txt"
+		// };
+		// }
 		if (args != null && args.length == 3) {
 			File f1 = new File(args[1]);
 			File f2 = new File(args[2]);
