@@ -1,4 +1,4 @@
-package com.smtreport;
+package com.emcraft.smtreport;
 
 import java.io.File;
 import java.io.FileReader;
