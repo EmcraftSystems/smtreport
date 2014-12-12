@@ -137,7 +137,6 @@ public class SMTReportProcessor {
 	private void generateBoradsReport(Map<String, List<Object>> file1,
 			Map<String, List<Object>> file2) {
 
-		System.out.println("BoardName" + "\t\t\t\t" + "Qty");
 		for (String key : file2.keySet()) {
 
 			List<Object> filelist1 = file1.get(key);
@@ -147,8 +146,6 @@ public class SMTReportProcessor {
 				List<?> row1 = (List<?>) filelist2.get(0);
 				String qty1 = (String) row1.get(PCB_ASSEMBLED);// PCBs assembled
 				int totalQty = Integer.valueOf(qty1);
-				System.out
-						.println("-----------------------------------------------");
 				System.out.println(row1.get(BOARD_NAME) + "\t\t"
 						+ Math.abs(totalQty));
 
@@ -161,8 +158,6 @@ public class SMTReportProcessor {
 				int qty2 = qty2Column == null ? 0 : Integer.valueOf(qty2Column);
 
 				int totalQty = qty1 - qty2;
-				System.out
-						.println("-----------------------------------------------");
 				System.out.println(row1.get(BOARD_NAME) + "\t\t"
 						+ Math.abs(totalQty));
 			}
