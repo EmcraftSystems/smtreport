@@ -78,11 +78,17 @@ public class SMTReportProcessor {
 			listReader = new CsvListReader(new FileReader(fileSource),
 					csvPreference);
 			listReader.getHeader(true);
-			final CellProcessor[] processors = getProcessors();
+
 			String nextBoardName = "";
 			String prevkey = "";
 			List<Object> rows = new ArrayList<Object>();
-			while ((reportList = listReader.read(processors)) != null) {
+			while (listReader.read() != null) {
+
+				int numColumns = listReader.length();
+
+				reportList = listReader
+						.executeProcessors(getProcessors(numColumns));
+
 				String layoutName = (String) reportList.get(BOARD_NAME);
 				nextBoardName = (layoutName == null ? "" : layoutName);
 				if (!("").equals(nextBoardName) && !("").equals(prevkey)) {
@@ -104,26 +110,28 @@ public class SMTReportProcessor {
 		return map;
 	}
 
-	private CellProcessor[] getProcessors() {
-		final CellProcessor[] processors = new CellProcessor[] { null, // empty
-				null, // Layout name
-				null, // Station
-				null, // Layouts assembled
-				null, // PCBs assembled
-				null, // Layout load time[s]
-				null, // Assembly time[s]/PCB
-				null, // Glue time[s]/PCB
-				new NotNull(), // Component
-				new NotNull(), // Number placed
-				null, // Time[s]/comp.
-				new Optional(new ParseInt()), // Mechanical failures
-				new Optional(new ParseInt()), // Electrical failures
-				new Optional(new ParseInt()), // Picking failures
-				new Optional(new ParseInt()), // Placement failures
-				new Optional(new ParseInt()), // Other failures
-				new Optional(new ParseInt()) // Consumed
-		};
-		return processors;
+	private CellProcessor[] getProcessors(int howMany) {
+		List<CellProcessor> processors = new ArrayList<CellProcessor>();
+
+		processors.add(null); // empty
+		processors.add(null); // Layout name
+		processors.add(null); // Station
+		processors.add(null); // Layouts assembled
+		processors.add(null); // PCBs assembled
+		processors.add(null); // Layout load time[s]
+		processors.add(null); // Assembly time[s]/PCB
+		processors.add(null); // Glue time[s]/PCB
+		processors.add(new NotNull()); // Component
+		processors.add(new NotNull()); // Number placed
+		processors.add(null); // Time[s]/comp.
+		processors.add(new Optional(new ParseInt())); // Mechanical failures
+		processors.add(new Optional(new ParseInt())); // Electrical failures
+		processors.add(new Optional(new ParseInt())); // Picking failures
+		processors.add(new Optional(new ParseInt())); // Placement failures
+		processors.add(new Optional(new ParseInt())); // Other failures
+		processors.add(new Optional(new ParseInt())); // Consumed
+
+		return processors.subList(0, howMany).toArray(new CellProcessor[0]);
 	}
 
 	private void generateBoradsReport(Map<String, List<Object>> file1,
@@ -147,9 +155,12 @@ public class SMTReportProcessor {
 			} else {
 				List<?> row1 = (List<?>) filelist1.get(0);
 				List<?> row2 = (List<?>) filelist2.get(0);
-				String qty1 = (String) row1.get(PCB_ASSEMBLED);// PCBs assembled
-				String qty2 = (String) row2.get(PCB_ASSEMBLED);// PCBs assembled
-				int totalQty = Integer.valueOf(qty1) - Integer.valueOf(qty2);
+				String qty1Column = (String) row1.get(PCB_ASSEMBLED);
+				String qty2Column = (String) row2.get(PCB_ASSEMBLED);
+				int qty1 = qty1Column == null ? 0 : Integer.valueOf(qty1Column);
+				int qty2 = qty2Column == null ? 0 : Integer.valueOf(qty2Column);
+
+				int totalQty = qty1 - qty2;
 				System.out
 						.println("-----------------------------------------------");
 				System.out.println(row1.get(BOARD_NAME) + "\t\t"
@@ -215,6 +226,13 @@ public class SMTReportProcessor {
 				for (int i = 0; i < filelist2.size(); i++) {
 					List<?> row1 = (List<?>) filelist1.get(i);
 					List<?> row2 = (List<?>) filelist2.get(i);
+					if (row1.size() <= NUMBER_PLACED
+							|| row2.size() <= NUMBER_PLACED) {
+						/*
+						 * This means we have no assembly data in this file.
+						 */
+						continue;
+					}
 					String qty1 = (String) row1.get(NUMBER_PLACED);
 					String qty2 = (String) row2.get(NUMBER_PLACED);
 					int qtyPlaced = Integer.valueOf(qty1)
