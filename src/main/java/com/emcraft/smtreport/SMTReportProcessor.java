@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.supercsv.cellprocessor.Optional;
-import org.supercsv.cellprocessor.ParseBigDecimal;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.ift.CellProcessor;
@@ -116,9 +115,9 @@ public class SMTReportProcessor {
 				null, // Glue time[s]/PCB
 				new NotNull(), // Component
 				new NotNull(), // Number placed
-				new Optional(new ParseBigDecimal()), // Time[s]/comp.
+				null, // Time[s]/comp.
 				new Optional(new ParseInt()), // Mechanical failures
-				new Optional(new ParseInt()),// Electrical failures
+				new Optional(new ParseInt()), // Electrical failures
 				new Optional(new ParseInt()), // Picking failures
 				new Optional(new ParseInt()), // Placement failures
 				new Optional(new ParseInt()), // Other failures
