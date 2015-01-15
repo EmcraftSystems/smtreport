@@ -120,15 +120,16 @@ public class SMTReportProcessor {
 				componentData.setComponent((String) reportList.get(COMPONENT));
 				componentData.setQtyPlaced(Integer.valueOf((String) reportList
 						.get(NUMBER_PLACED)));
-				componentData.setElectricalFailures((int) reportList
+				componentData.setElectricalFailures((Integer) reportList
 						.get(ELECTRICAL_FAILURE));
-				componentData.setMechanicalFailures((int) reportList
+				componentData.setMechanicalFailures((Integer) reportList
 						.get(MECHNICAL_FAILURE));
-				componentData.setPlacementFailures((int) reportList
+				componentData.setPlacementFailures((Integer) reportList
 						.get(PLACEMENT_FAILURE));
-				componentData.setOtherFailures((int) reportList
+				componentData.setOtherFailures((Integer) reportList
 						.get(OTHER_FAILURE));
-				componentData.setQtyConsumed((int) reportList.get(CONSUMED));
+				componentData
+						.setQtyConsumed((Integer) reportList.get(CONSUMED));
 
 				currentReportElement.addComponentData(componentData);
 			}
