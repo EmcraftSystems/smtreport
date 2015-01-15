@@ -60,7 +60,6 @@ public class SMTReportProcessor {
 
 		SMTReport report1 = readFile(file1, CsvPreference.TAB_PREFERENCE);
 		SMTReport report2 = readFile(file2, CsvPreference.TAB_PREFERENCE);
-		report1.print();
 
 		if (BOARD_REPORT.equals(type)) {
 			generateBoradsReport(report1, report2);
