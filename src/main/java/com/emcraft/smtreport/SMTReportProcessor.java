@@ -104,8 +104,20 @@ public class SMTReportProcessor {
 					currentReportElement.setLayoutName(layoutName);
 					currentReportElement.setStation((String) reportList
 							.get(STATION_NAME));
-					currentReportElement.setPcbsAssembled(Integer
-							.valueOf((String) reportList.get(PCB_ASSEMBLED)));
+
+					String pcbsAssembled = (String) reportList
+							.get(PCB_ASSEMBLED);
+					if (pcbsAssembled != null) {
+
+						try {
+							currentReportElement.setPcbsAssembled(Integer
+									.valueOf(pcbsAssembled));
+						} catch (java.lang.NumberFormatException e) {
+							System.err
+									.println("Invalid number format for PCBs Assembled in "
+											+ fileSource);
+						}
+					}
 				}
 
 				if (numColumns < 16) {
